@@ -1,60 +1,35 @@
-# Template: Python - Minimal
+# Overview
 
-This template leverages the new [Python framework](https://github.com/robocorp/robocorp), the [libraries](https://github.com/robocorp/robocorp/blob/master/docs/README.md#python-libraries) from to same project as well.
+This is a Robocorp automation robot for extracting news articles from a website and saving them to an Excel file.
 
-The template provides you with the basic structure of a Python project: logging out of the box and controlling your tasks without fiddling with the base Python stuff. The environment contains the most used libraries, so you do not have to start thinking about those right away. 
+## Overview
 
-👉 Other templates are available as well via our tooling and on our [Portal](https://robocorp.com/portal/tag/template)
+This automation robot performs the following tasks:
+- Opens a website (https://www.aljazeera.com/search/obama?sort=date)
+- Inserts a search query retrieved from Control Room's cloud workspace
+- Retrieves a list of articles based on the number of months specified in the cloud
+- Creates an Excel file
+- Inserts rows into the Excel file containing information about each article
+- Downloads the image for each processed article
 
-## Running
+Input data: Two arguments from the cloud, named "SearchPhrase" and "NumberOfMonths"
+Output (if needed): All the pictures from the processed articles, log.html, and the Excel file
 
-#### VS Code
-1. Get [Robocorp Code](https://robocorp.com/docs/developer-tools/visual-studio-code/extension-features) -extension for VS Code.
-1. You'll get an easy-to-use side panel and powerful command-palette commands for running, debugging, code completion, docs, etc.
-
-#### Command line
-
-1. [Get RCC](https://github.com/robocorp/rcc?tab=readme-ov-file#getting-started)
-1. Use the command: `rcc run`
+Link for exercise overview: [RPA Challenge - Fresh news 2.0](https://thoughtfulautomation.notion.site/RPA-Challenge-Fresh-news-2-0-37e2db5f88cb48d5ab1c972973226eb4)
 
 ## Results
 
-🚀 After running the bot, check out the `log.html` under the `output` -folder.
+🚀 After running the bot, check out the `output` folder:
+- An Excel file is generated, named "news_report.xlsx"
+- Check `log.html` for any logged information
+- Review the images downloaded from articles within the specified time constraints  
 
-## Dependencies
+## Quick reminders
 
-We strongly recommend getting familiar with adding your dependencies in [conda.yaml](conda.yaml) to control your Python dependencies and the whole Python environment for your automation.
+- This automation employs a pagination mechanism. While the articles meet the date requirement, the automation continues to click "Show more" to expand the list of articles.
+- The news page (https://www.aljazeera.com/search/obama?sort=date) is based in Qatar, so all date manipulations consider their timezone.
+- The news page does not include category filtering after the search phrase.
+- Each image is downloaded using the 'alt' tag from HTML. Sometimes this attribute does not exist, so the file name is set as "Article" followed by the number of the processed item.
+- If the search phrase does not retrieve any data, the automation ends successfully without generating output data in the `output` folder.
+- The maximum number of retries to open the browser on the news URL is set to 3.
 
-<details>
-  <summary>🙋‍♂️ "Why not just pip install...?"</summary>
-
-Think of [conda.yaml](conda.yaml) as an equivalent of the requirements.txt, but much better. 👩‍💻 With `conda.yaml`, you are not just controlling your PyPI dependencies; you control the complete Python environment, which makes things repeatable and easy.
-
-👉 You will probably need to run your code on another machine quite soon, so by using `conda.yaml`:
-- You can avoid `Works on my machine` -cases
-- You do not need to manage Python installations on all the machines
-- You can control exactly which version of Python your automation will run on 
-  - You'll also control the pip version to avoid dep. resolution changes
-- No need for venv, pyenv, ... tooling and knowledge sharing inside your team.
-- Define dependencies in conda.yaml, let our tooling do the heavy lifting.
-- You get all the content of [conda-forge](https://prefix.dev/channels/conda-forge) without any extra tooling
-
-> Dive deeper with [these](https://github.com/robocorp/rcc/blob/master/docs/recipes.md#what-is-in-condayaml) resources.
-
-</details>
-<br/>
-
-> The full power of [rpaframework](https://robocorp.com/docs/python/rpa-framework) -libraries is also available on Python as a backup while we implement the new Python libraries.
-
-## What now?
-
-🚀 Now, go get'em
-
-Start writing Python and remember that the AI/LLM's out there are getting really good and creating Python code specifically.
-
-👉 Try out [Robocorp ReMark 💬](https://chat.robocorp.com)
-
-For more information, do not forget to check out the following:
-- [Robocorp Documentation -site](https://robocorp.com/docs)
-- [Portal for more examples](https://robocorp.com/portal)
-- Follow our main [robocorp -repository](https://github.com/robocorp/robocorp) as it is the main location where we developed the libraries and the framework.
