@@ -19,8 +19,8 @@ def automation_robot():
     )
 
     #Testing items
-    #cloud_search_phrase = "money"
-    #cloud_number_of_months = "7"
+    #cloud_search_phrase = "Miley"
+    #cloud_number_of_months = "12"
 
     # Retrieve the search phrase and number of months from the work item payload
     cloud_search_phrase, cloud_number_of_months = handle_item()
@@ -220,12 +220,16 @@ def extract_article_details(pattern, int_match_group, article):
             return None
 
 def download_image(image_url, file_name):
-    # Send a GET request to the specified image URL and retrieve the image data
-    img_data = requests.get(image_url).content
-    
-    # Open a file in binary write mode in the 'output' directory and save the image data
-    with open(os.path.join("output", file_name), 'wb') as handler:
-        handler.write(img_data)
+    try:
+        # Send a GET request to the specified image URL and retrieve the image data
+        img_data = requests.get(image_url).content
+        
+        # Open a file in binary write mode in the 'output' directory and save the image data
+        with open(os.path.join("output", file_name), 'wb') as handler:
+            handler.write(img_data)
+    except Exception as e:
+        # If an error occurs during the image downloading process, raise a custom error message
+        raise Exception(f"Error downloading image from URL '{image_url}': {e}")
 
 def count_substring_occurrences(search_phrase, title, description):
     # Combine the title and description into a single string
@@ -276,75 +280,80 @@ def contains_money_amount(description):
     return False
 
 def excel_insert_rows(excel, list_of_articles, cloud_search_phrase, limit_date):
-    # Iterate over the list of articles
+# Iterate over the list of articles
     for index, article in enumerate(list_of_articles):
 
-        # Print the processing status of the current article
-        print(f"Processing article number {index+1}")
+        try:
+            # Print the processing status of the current article
+            print(f"Processing article number {index+1}")
 
-        # Replace special characters in the article
-        article = article.replace("\xad", "")
+            # Replace special characters in the article
+            article = article.replace("\xad", "")
 
-        # TITLE
-        # Define the pattern to match the title within <span> tags
-        pattern = r'<span>(.*?)</span>'
-        # Extract the title from the article using the defined pattern
-        title = extract_article_details(pattern, 1, article)
+            # TITLE
+            # Define the pattern to match the title within <span> tags
+            pattern = r'<span>(.*?)</span>'
+            # Extract the title from the article using the defined pattern
+            title = extract_article_details(pattern, 1, article)
 
-        # DESCRIPTION
-        pattern = r'<p>(.*?)</p>'
-        # Extract the description from the article using the defined pattern
-        description = extract_article_details(pattern, 1, article)
-        # If HTML tags are present, remove them from the description
-        description = re.sub(r'<.*?>|&\w+;', '', description)
+            # DESCRIPTION
+            pattern = r'<p>(.*?)</p>'
+            # Extract the description from the article using the defined pattern
+            description = extract_article_details(pattern, 1, article)
+            # If HTML tags are present, remove them from the description
+            description = re.sub(r'<.*?>|&\w+;', '', description)
 
-        # DATE
-        # Extract the date from the description
-        date = extract_date(description)
-        # Check if the article date is greater than the limit date
-        if not is_article_date_bigger_than_limit_date(date, limit_date):
-            # If the article date is not greater than the limit date, stop processing further articles
-            break
+            # DATE
+            # Extract the date from the description
+            date = extract_date(description)
+            # Check if the article date is greater than the limit date
+            if not is_article_date_bigger_than_limit_date(date, limit_date):
+                # If the article date is not greater than the limit date, break the loop
+                break
 
-        # SRC
-        pattern = r'(?:src=")([^"]+)"'
-        # Extract the image URL from the article using the defined pattern
-        image_url = extract_article_details(pattern, 1, article)
+            # SRC
+            pattern = r'(?:src=")([^"]+)"'
+            # Extract the image URL from the article using the defined pattern
+            image_url = extract_article_details(pattern, 1, article)
 
-        # ALT
-        pattern = r'alt="([^"]+)"'
-        # Extract the alt text from the article using the defined pattern
-        file_name = extract_article_details(pattern, 1, article)
-        if file_name:
-            # Remove special characters from the file name
-            file_name = re.sub(r'[^a-zA-Z0-9\s]', '', file_name)
-            # Truncate the file name if its length exceeds 100 characters
-            if len(file_name) > 100:
-                words = file_name.split()
-                smaller_file_name = ' '.join(words[:3])
-                file_name = smaller_file_name
-            # Append ".jpg" extension to the file name
-            file_name += ".jpg"
-        else:
-            # If no alt text is found, use a default file name
-            file_name = f"Article {index+1}.jpg"
+            # ALT
+            pattern = r'alt="([^"]+)"'
+            # Extract the alt text from the article using the defined pattern
+            file_name = extract_article_details(pattern, 1, article)
+            if file_name:
+                # Remove special characters from the file name
+                file_name = re.sub(r'[^a-zA-Z0-9\s]', '', file_name)
+                # Truncate the file name if its length exceeds 100 characters
+                if len(file_name) > 100:
+                    words = file_name.split()
+                    smaller_file_name = ' '.join(words[:3])
+                    file_name = smaller_file_name
+                # Append ".jpg" extension to the file name
+                file_name += ".jpg"
+            else:
+                # If no alt text is found, use a default file name
+                file_name = f"Article {index+1}.jpg"
 
-        # Download the image associated with the article
-        download_image(image_url, file_name)
+            # Download the image associated with the article
+            download_image(image_url, file_name)
 
-        # Count the occurrences of the search phrase in the title and description
-        count_of_phrases = count_substring_occurrences(cloud_search_phrase, title, description)
-        # Check if the description contains a money amount
-        has_money_amount = contains_money_amount(description)
-        
-        # Create a row containing title, date, description, image file name, count of phrases, and money amount flag
-        row = [title, date, description, file_name, count_of_phrases, has_money_amount]
+            # Count the occurrences of the search phrase in the title and description
+            count_of_phrases = count_substring_occurrences(cloud_search_phrase, title, description)
+            # Check if the description contains a money amount
+            has_money_amount = contains_money_amount(description)
+            
+            # Create a row containing title, date, description, image file name, count of phrases, and money amount flag
+            row = [title, date, description, file_name, count_of_phrases, has_money_amount]
 
-        # Append the row to the Excel worksheet
-        excel.append_rows_to_worksheet([row])
+            # Append the row to the Excel worksheet
+            excel.append_rows_to_worksheet([row])
 
-        # Save the workbook
-        excel.save_workbook("output/news_report.xlsx")
+            # Save the workbook
+            excel.save_workbook("output/news_report.xlsx")
+
+        except Exception as e:
+            print(f"An error occurred for article number {index+1}: {e}")
+
 
 def is_article_date_bigger_than_limit_date(date_from_article, limit_date):
     #Convert date from article to datetime
